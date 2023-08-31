@@ -5,7 +5,7 @@ import logo from "./assets/logo.png"
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import db from "./config"
-import { collection, getDocs, query, refEqual, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, refEqual, where } from 'firebase/firestore';
 
 
 
@@ -241,21 +241,26 @@ function App() {
 
 
 
-  // const [student_r, setStudent_r] = ([])
+  const [student_r, setStudent_r] = useState("")
 
 
   const [rankToFetch, setRankToFetch] = useState(1); // State for the rank to fetch
 
   const fetchStudent = async () => {
     try {
-      const rank = document.getElementById('inputRank').value
-
+      const rank = parseInt(document.getElementById('inputRank').value)
+      // const rank = 59038
+      console.log("rank is , ", rank)
       const q = query(collection(db, 'convener'), where('rank', '==', rank)); // Use rankToFetch in the query
       const querySnapshot = await getDocs(q);
-      console.log(querySnapshot.docs[0])
       if (!querySnapshot.empty) {
-        const studentDoc = querySnapshot.docs[0];
-        setValue( studentDoc.data().name );
+        const studentDoc = querySnapshot.docs[0].data().name;
+        const dpt = querySnapshot.docs[0].data().bnc;
+        console.log(studentDoc)
+
+        setValue(studentDoc);
+        setStudent_r(dpt)
+        setForm((prev) => !prev)
       } else {
         console.log('No student found with the given condition.');
       }
@@ -263,6 +268,44 @@ function App() {
       console.error('Error fetching student:', error);
     }
   };
+
+
+
+
+
+
+
+
+
+
+const [sno, setSno] = useState('');
+const [pno, setPno] = useState('');
+const [count, setCount] = useState(1)
+const [sname, setsName] = useState('')
+  const _handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const collectionRef = collection(db, 'registrations'); // Replace with your collection name
+      await addDoc(collectionRef, {
+        sNumber: sno,
+        pNumber: pno,
+        count: count,
+        sname: value
+      });
+      console.log('Document added successfully');
+      setSno('');
+      setPno('');
+      setCount(1);
+      setsName('');
+
+      alert('Form Submitted')
+    } catch (error) {
+      console.error('Error adding document:', error);
+    }
+  };
+
+
+
 
 
 
@@ -663,7 +706,7 @@ function App() {
                             fontSize: '1.2rem',
                             color: '#1e4160',
                             fontWeight: 300
-                          }} color={'#1e4160'} key={department}  >{department}</Typography>
+                          }} color={'#1e4160'} key={department}  >{quota == " Management Quota" ? department : student_r}</Typography>
                         </Stack>
                       </Stack>
                     </Stack>
@@ -680,57 +723,59 @@ function App() {
 
 
                       }} >
-                        <br />
-                        <label style={{
-                          width: '85vw',
-                          marginRight: '60px',
-                          fontSize: '1.2rem',
-                          textAlign: 'center',
-                        }} >Enter Your Mobile Number: </label>
-                        <br />
+                        <form onSubmit={_handleSubmit} >
+                          <br />
+                          <label style={{
+                            width: '85vw',
+                            marginRight: '60px',
+                            fontSize: '1.2rem',
+                            textAlign: 'center',
+                          }} >Enter Your Mobile Number: </label>
+                          <br />
 
-                        <input
-                          type="text"
-                          placeholder="10 digit mobile number"
+                          <input
+                            type="text"
+                            placeholder="10 digit mobile number"
+                            onChange={(e)=>setSno(e.target.value)}
+                          />
+                          <br />
+                          <br />
+                          <label style={{
+                            width: '85vw',
+                            marginRight: '60px',
+                            fontSize: '1.2rem',
+                            textAlign: 'center',
 
-                        />
-                        <br />
-                        <br />
-                        <label style={{
-                          width: '85vw',
-                          marginRight: '60px',
-                          fontSize: '1.2rem',
-                          textAlign: 'center',
+                          }} >Enter Your Parent Mobile Number:</label>
+                          <br></br>
 
-                        }} >Enter Your Parent Mobile Number:</label>
-                        <br></br>
+                          <input
+                            type="text"
+                            placeholder="10 digit mobile number"
+                            onChange={(e)=>setPno(e.target.value)}
+                          />
+                          <br />
+                          <br />
+                          <label style={{
+                            width: '85vw',
+                            marginRight: '60px',
+                            fontSize: '1.2rem',
+                            textAlign: 'center',
 
-                        <input
-                          type="text"
-                          placeholder="10 digit mobile number"
+                          }} >Number of people attending the Orientation  </label>
+                          <br />
 
-                        />
-                        <br />
-                        <br />
-                        <label style={{
-                          width: '85vw',
-                          marginRight: '60px',
-                          fontSize: '1.2rem',
-                          textAlign: 'center',
-
-                        }} >Number of people attending the Orientation  </label>
-                        <br />
-
-                        <input
-                          type="text"
-                          placeholder="Enter the count"
-                        // onChange={(e) => display(e.target.value)}
-                        />
-                        <br />
-                        <br />
-                        <button type="button" className="btn btn-primary"  >
-                          Submit
-                        </button>
+                          <input
+                            type="number"
+                            placeholder="Enter the count"
+                            onChange={(e)=>setCount(e.target.value)}
+                          />
+                          <br />
+                          <br />
+                          <button type="submit" className="btn btn-primary"  >
+                            Submit
+                          </button>
+                        </form>
                       </div>
 
 
